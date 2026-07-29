@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caderno de gastos</title>
+  <meta name="theme-color" content="#0F6E56" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Gate de senha -->
+  <div id="gate" class="gate">
+    <div class="gate-card">
+      <h1 class="gate-title">Caderno de gastos</h1>
+      <p class="gate-sub">Digite a senha do painel para continuar.</p>
+      <input id="gate-input" class="gate-input" type="password" placeholder="Senha" autocomplete="current-password" />
+      <button id="gate-btn" class="gate-btn">Entrar</button>
+      <p id="gate-error" class="gate-error" hidden>Senha incorreta. Tente de novo.</p>
+    </div>
+  </div>
+
+  <!-- App -->
+  <main id="app" class="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">₪</span>
+        <span class="brand-name">Caderno de gastos</span>
+      </div>
+      <div class="month-nav">
+        <button id="prev-month" class="icon-btn" aria-label="Mês anterior">‹</button>
+        <span id="month-label" class="month-label">—</span>
+        <button id="next-month" class="icon-btn" aria-label="Próximo mês">›</button>
+      </div>
+    </header>
+
+    <!-- Fita do total (elemento-assinatura) -->
+    <section class="tape" aria-live="polite">
+      <span class="tape-label">Total do mês</span>
+      <span id="total" class="tape-total">R$ 0,00</span>
+      <span id="count" class="tape-count">0 lançamentos</span>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2 class="panel-title">Por categoria</h2>
+        <div class="chart-wrap">
+          <canvas id="chart" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
+          <div id="chart-empty" class="empty" hidden>Sem gastos neste mês.</div>
+        </div>
+        <ul id="legend" class="legend"></ul>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Lançamentos</h2>
+        <ul id="list" class="ledger"></ul>
+        <div id="list-empty" class="empty" hidden>Nada por aqui ainda. Manda um gasto no WhatsApp.</div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <button id="refresh" class="text-btn">Atualizar</button>
+      <button id="logout" class="text-btn">Sair</button>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

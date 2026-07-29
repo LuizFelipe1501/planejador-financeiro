@@ -1,0 +1,10 @@
+{
+  "name": "finance-whatsapp",
+  "version": "1.0.0",
+  "description": "Planejador financeiro pessoal: registra gastos pelo WhatsApp, interpreta com Gemini, guarda no Supabase e mostra num dashboard PWA na Vercel.",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
