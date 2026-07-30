@@ -4,10 +4,16 @@ import { supabase } from '../lib/supabase.js';
 // header x-dashboard-token (comparado com DASHBOARD_TOKEN). É uma proteção
 // básica, suficiente para uso pessoal — para algo mais forte, use Supabase Auth.
 
+// Proteção opcional: se DASHBOARD_TOKEN estiver definido, exige o header
+// x-dashboard-token. Se não estiver (caso atual, sem senha), o painel fica
+// aberto. Para religar a senha depois, basta definir DASHBOARD_TOKEN.
 export default async function handler(req, res) {
-  const token = req.headers['x-dashboard-token'];
-  if (!process.env.DASHBOARD_TOKEN || token !== process.env.DASHBOARD_TOKEN) {
-    return res.status(401).json({ error: 'não autorizado' });
+  const required = process.env.DASHBOARD_TOKEN;
+  if (required) {
+    const token = req.headers['x-dashboard-token'];
+    if (token !== required) {
+      return res.status(401).json({ error: 'não autorizado' });
+    }
   }
 
   const now = new Date();

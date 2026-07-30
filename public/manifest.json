@@ -1,18 +1,13 @@
 {
   "name": "Caderno de gastos",
-  "short_name": "Gastos",
+  "short_name": "Caderno",
   "description": "Seus gastos, registrados pelo WhatsApp.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f2f3ef",
-  "theme_color": "#0f6e56",
+  "background_color": "#07070d",
+  "theme_color": "#07070d",
   "icons": [
-    {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

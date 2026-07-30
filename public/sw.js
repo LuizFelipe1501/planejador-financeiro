@@ -1,7 +1,7 @@
 // Service worker mínimo: garante instalabilidade e um cache leve do app shell.
 // Os dados (gastos) nunca são cacheados — sempre buscados frescos da API.
 
-const CACHE = 'caderno-gastos-v1';
+const CACHE = 'caderno-gastos-v2';
 const SHELL = ['/', '/index.html', '/styles.css', '/app.js', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', (e) => {

@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0f6e56"/>
-  <rect x="126" y="120" width="260" height="288" rx="20" fill="#fbfcfa"/>
-  <line x1="126" y1="176" x2="386" y2="176" stroke="#0f6e56" stroke-width="10"/>
-  <line x1="168" y1="228" x2="344" y2="228" stroke="#dde0da" stroke-width="14" stroke-linecap="round"/>
-  <line x1="168" y1="276" x2="344" y2="276" stroke="#dde0da" stroke-width="14" stroke-linecap="round"/>
-  <line x1="168" y1="324" x2="290" y2="324" stroke="#dde0da" stroke-width="14" stroke-linecap="round"/>
-  <text x="256" y="160" font-family="monospace" font-size="40" fill="#0f6e56" text-anchor="middle" font-weight="bold">R$</text>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#35d6a4"/>
+      <stop offset="1" stop-color="#1ea87d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0b0b14"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#g)" stroke-width="20"/>
+  <text x="256" y="300" font-family="monospace" font-size="150" fill="url(#g)" text-anchor="middle" font-weight="bold">R$</text>
 </svg>
