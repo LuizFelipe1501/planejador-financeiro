@@ -3,8 +3,8 @@ const brl0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'
 
 // Emoji + cor por categoria
 const CAT = {
-  'alimentação': { c: '#35d6a4', e: '🍽️' },
-  'transporte':  { c: '#4aa3ff', e: '🚗' },
+  'alimentação': { c: '#3d7bff', e: '🍽️' },
+  'transporte':  { c: '#38bdf8', e: '🚗' },
   'moradia':     { c: '#f5934a', e: '🏠' },
   'lazer':       { c: '#b98bff', e: '🎉' },
   'saúde':       { c: '#ff6b6b', e: '💊' },
@@ -17,6 +17,7 @@ const CAT = {
 const catInfo = (c) => CAT[c] || CAT['outros'];
 
 const state = { ref: new Date(), chart: null };
+const TOKEN = new URLSearchParams(location.search).get('t');
 const $ = (id) => document.getElementById(id);
 const monthStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
@@ -37,7 +38,9 @@ async function load() {
 
   let expenses = [];
   try {
-    const res = await fetch(`/api/expenses?month=${monthStr(state.ref)}`);
+    const q = `/api/expenses?month=${monthStr(state.ref)}${TOKEN ? `&t=${encodeURIComponent(TOKEN)}` : ''}`;
+    const res = await fetch(q);
+    if (res.status === 401) { renderLocked(); return; }
     if (res.ok) {
       const data = await res.json();
       expenses = data.expenses || [];
@@ -73,6 +76,21 @@ async function load() {
   renderTxns(expenses);
 }
 
+function renderLocked() {
+  $('total').textContent = 'R$ 0,00';
+  $('count').textContent = '0';
+  $('avg').textContent = 'R$ 0';
+  $('top').textContent = '—';
+  $('insight').textContent = 'Abra o painel pelo seu link pessoal — o Caderno te envia ele no WhatsApp assim que você manda a primeira mensagem.';
+  if (state.chart) { state.chart.destroy(); state.chart = null; }
+  $('flow').style.display = 'none';
+  $('flow-empty').hidden = false;
+  $('cats').innerHTML = '';
+  $('cats-empty').hidden = false;
+  $('list').innerHTML = '';
+  $('list-empty').hidden = false;
+}
+
 function renderInsight(expenses, total, topCat, topPct, avg, nCats) {
   const el = $('insight');
   if (!expenses.length) {
@@ -104,8 +122,8 @@ function renderFlow(expenses, daysInMonth) {
 
   const ctx = $('flow').getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 170);
-  grad.addColorStop(0, 'rgba(53, 214, 164, 0.35)');
-  grad.addColorStop(1, 'rgba(53, 214, 164, 0)');
+  grad.addColorStop(0, 'rgba(61, 123, 255, 0.35)');
+  grad.addColorStop(1, 'rgba(61, 123, 255, 0)');
 
   state.chart = new Chart(ctx, {
     type: 'line',
@@ -113,14 +131,14 @@ function renderFlow(expenses, daysInMonth) {
       labels,
       datasets: [{
         data: daily,
-        borderColor: '#35d6a4',
+        borderColor: '#3d7bff',
         backgroundColor: grad,
         borderWidth: 2,
         fill: true,
         tension: 0.35,
         pointRadius: 0,
         pointHoverRadius: 4,
-        pointHoverBackgroundColor: '#35d6a4',
+        pointHoverBackgroundColor: '#3d7bff',
       }],
     },
     options: {

@@ -139,3 +139,21 @@ Para testar o cron manualmente: chame `GET /api/report` com o header
 - [ ] DASHBOARD_TOKEN e CRON_SECRET definidos
 - [ ] Webhook verificado e campo `messages` assinado
 - [ ] Template `resumo_mensal` aprovado (só para o relatório automático)
+
+---
+
+## 6. Multiusuário (já preparado)
+O projeto já nasce multi-tenant, mas em modo de teste:
+- **Onboarding automático**: um número novo que manda mensagem vira um usuário e
+  recebe um link pessoal do painel (`/painel?t=<token>`).
+- **Trava de teste**: enquanto `ALLOWED_NUMBERS` estiver preenchida, só esses
+  números conseguem entrar. Esvazie a variável quando quiser abrir a qualquer um.
+- **APP_URL**: defina com a URL pública (ex.: `https://caderno-gastos.vercel.app`)
+  pra que o link do painel seja montado corretamente no onboarding.
+- **Relatório**: o cron percorre a tabela `users` e manda o resumo de cada um.
+- **Painel**: cada pessoa só vê os próprios gastos, via o token do seu link.
+  Sem token, o painel mostra um aviso pra abrir pelo link do WhatsApp.
+
+Para escalar de verdade depois (vender): verifique o negócio na Meta (sai do
+limite de 250/dia), troque o link-token por login real (Supabase Auth) e
+adicione uma fila pro webhook responder rápido sob volume.

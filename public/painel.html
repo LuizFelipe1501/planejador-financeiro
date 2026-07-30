@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caderno de gastos</title>
+  <meta name="theme-color" content="#07070d" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">R$</span>
+        <span class="brand-name">Caderno</span>
+      </div>
+      <div class="month-nav">
+        <button id="prev-month" class="icon-btn" aria-label="Mês anterior">‹</button>
+        <span id="month-label" class="month-label">—</span>
+        <button id="next-month" class="icon-btn" aria-label="Próximo mês">›</button>
+      </div>
+    </header>
+
+    <!-- Mesa principal: gasto do período -->
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-head">
+        <span class="hero-label">Gasto no período</span>
+        <span class="hero-chip" id="hero-month">—</span>
+      </div>
+      <div class="hero-total" id="total">R$ 0,00</div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-val" id="count">0</span>
+          <span class="stat-key">lançamentos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="avg">R$ 0</span>
+          <span class="stat-key">média/dia</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val stat-cat" id="top">—</span>
+          <span class="stat-key">maior categoria</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Linha de insight da IA -->
+    <section class="insight">
+      <div class="insight-avatar">IA</div>
+      <div class="insight-body">
+        <span class="insight-name">Resumo da IA</span>
+        <p class="insight-text" id="insight">Analisando seus gastos…</p>
+      </div>
+    </section>
+
+    <!-- Mesa: fluxo do mês -->
+    <section class="panel">
+      <div class="panel-head"><h2>Fluxo do mês</h2></div>
+      <div class="chart-wrap">
+        <canvas id="flow"></canvas>
+        <div id="flow-empty" class="empty" hidden>Sem gastos neste mês.</div>
+      </div>
+    </section>
+
+    <!-- Mesa: por categoria -->
+    <section class="panel">
+      <div class="panel-head"><h2>Por categoria</h2></div>
+      <div id="cats" class="cats"></div>
+      <div id="cats-empty" class="empty" hidden>Sem gastos neste mês.</div>
+    </section>
+
+    <!-- Mesa: lançamentos -->
+    <section class="panel">
+      <div class="panel-head"><h2>Lançamentos</h2></div>
+      <div id="list" class="txns"></div>
+      <div id="list-empty" class="empty" hidden>Nada por aqui ainda. Manda um gasto no WhatsApp.</div>
+    </section>
+
+    <footer class="foot">
+      <button id="refresh" class="text-btn">Atualizar</button>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

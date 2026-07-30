@@ -3,92 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caderno de gastos</title>
+  <title>Caderno — seus gastos no WhatsApp</title>
   <meta name="theme-color" content="#07070d" />
-  <link rel="manifest" href="/manifest.json" />
+  <meta name="description" content="Anote seus gastos mandando uma mensagem no WhatsApp. A IA categoriza, soma e organiza num painel em tempo real." />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/icon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/landing.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <div class="brand">
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/">
         <span class="brand-mark">R$</span>
-        <span class="brand-name">Caderno</span>
+        <span>Caderno</span>
+      </a>
+      <div class="nav-links">
+        <a href="#recursos">Recursos</a>
+        <a href="#como">Como funciona</a>
+        <a class="btn btn-primary" href="/painel.html">Abrir painel</a>
       </div>
-      <div class="month-nav">
-        <button id="prev-month" class="icon-btn" aria-label="Mês anterior">‹</button>
-        <span id="month-label" class="month-label">—</span>
-        <button id="next-month" class="icon-btn" aria-label="Próximo mês">›</button>
-      </div>
-    </header>
+    </div>
+  </nav>
 
-    <!-- Mesa principal: gasto do período -->
-    <section class="hero">
-      <div class="hero-glow"></div>
-      <div class="hero-head">
-        <span class="hero-label">Gasto no período</span>
-        <span class="hero-chip" id="hero-month">—</span>
-      </div>
-      <div class="hero-total" id="total">R$ 0,00</div>
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-val" id="count">0</span>
-          <span class="stat-key">lançamentos</span>
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">● Seu dinheiro, direto no WhatsApp</span>
+        <h1>Anote seus gastos como quem <span class="grad">manda um zap</span>.</h1>
+        <p class="lead">Sem planilha, sem app pra abrir. Você manda "mercado 45" no WhatsApp e o resto acontece sozinho: categorizado, somado e pronto pra consultar no painel.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="/painel.html">Abrir painel →</a>
+          <a class="btn btn-ghost btn-lg" href="#como">Como funciona</a>
         </div>
-        <div class="stat">
-          <span class="stat-val" id="avg">R$ 0</span>
-          <span class="stat-key">média/dia</span>
+        <p class="hero-note">Registro por texto · categorização automática por IA · relatório no WhatsApp</p>
+      </div>
+
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="wa-head">
+            <div class="wa-avatar">R$</div>
+            <div>
+              <div class="wa-name">Caderno</div>
+              <div class="wa-status">online</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="bubble out">mercado 45<span class="t">14:32</span></div>
+            <div class="bubble in">Anotado: <b>R$ 45,00</b> em alimentação.<span class="t">14:32</span></div>
+            <div class="bubble out">uber 22 ontem<span class="t">14:33</span></div>
+            <div class="bubble in">Anotado: <b>R$ 22,00</b> em transporte (Uber).<span class="t">14:33</span></div>
+            <div class="bubble out">relatório<span class="t">14:35</span></div>
+            <div class="bubble in">Resumo de julho<br/>Total: <b>R$ 1.240,00</b><br/>18 lançamentos<span class="t">14:35</span></div>
+          </div>
         </div>
-        <div class="stat">
-          <span class="stat-val stat-cat" id="top">—</span>
-          <span class="stat-key">maior categoria</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="strip">
+      <span><span class="dot"></span> Categorização automática</span>
+      <span><span class="dot"></span> Painel em tempo real</span>
+      <span><span class="dot"></span> Relatório semanal</span>
+      <span><span class="dot"></span> Instalável no celular</span>
+    </div>
+  </div>
+
+  <section class="section" id="recursos">
+    <div class="wrap">
+      <h2>Feito pra quem odeia planilha.</h2>
+      <p class="sub">Toda a burocracia de anotar gasto vira uma mensagem. A IA cuida do resto.</p>
+      <div class="cards">
+        <div class="feature">
+          <div class="ic">💬</div>
+          <h3>Anote em segundos</h3>
+          <p>Manda o gasto em texto normal, do seu jeito. A IA entende o valor, a categoria e até a data ("ontem", "sexta").</p>
+        </div>
+        <div class="feature">
+          <div class="ic">📊</div>
+          <h3>Painel que se organiza</h3>
+          <p>Gasto do período, fluxo do mês, quebra por categoria e todos os lançamentos, atualizados na hora.</p>
+        </div>
+        <div class="feature">
+          <div class="ic">🔔</div>
+          <h3>Relatório vem até você</h3>
+          <p>Um resumo do mês chega no seu WhatsApp. E quando quiser, é só mandar "relatório" pra ver na hora.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Linha de insight da IA -->
-    <section class="insight">
-      <div class="insight-avatar">IA</div>
-      <div class="insight-body">
-        <span class="insight-name">Resumo da IA</span>
-        <p class="insight-text" id="insight">Analisando seus gastos…</p>
+  <section class="section" id="como">
+    <div class="wrap">
+      <h2>Como funciona</h2>
+      <p class="sub">Três passos. O primeiro leva cinco segundos.</p>
+      <div class="steps">
+        <div class="step">
+          <h3>Manda o gasto</h3>
+          <p>"iFood 38", "gasolina 200", "farmácia 47 ontem". Do jeito que vier na cabeça.</p>
+        </div>
+        <div class="step">
+          <h3>A IA organiza</h3>
+          <p>O gasto é categorizado e guardado automaticamente. Você recebe a confirmação na hora.</p>
+        </div>
+        <div class="step">
+          <h3>Você acompanha</h3>
+          <p>Abre o painel e vê pra onde seu dinheiro está indo, sem esforço nenhum.</p>
+        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Mesa: fluxo do mês -->
-    <section class="panel">
-      <div class="panel-head"><h2>Fluxo do mês</h2></div>
-      <div class="chart-wrap">
-        <canvas id="flow"></canvas>
-        <div id="flow-empty" class="empty" hidden>Sem gastos neste mês.</div>
-      </div>
-    </section>
+  <div class="wrap">
+    <div class="cta">
+      <h2>Pronto pra parar de perder o controle dos gastos?</h2>
+      <a class="btn btn-primary btn-lg" href="/painel.html">Abrir meu painel →</a>
+    </div>
+  </div>
 
-    <!-- Mesa: por categoria -->
-    <section class="panel">
-      <div class="panel-head"><h2>Por categoria</h2></div>
-      <div id="cats" class="cats"></div>
-      <div id="cats-empty" class="empty" hidden>Sem gastos neste mês.</div>
-    </section>
-
-    <!-- Mesa: lançamentos -->
-    <section class="panel">
-      <div class="panel-head"><h2>Lançamentos</h2></div>
-      <div id="list" class="txns"></div>
-      <div id="list-empty" class="empty" hidden>Nada por aqui ainda. Manda um gasto no WhatsApp.</div>
-    </section>
-
-    <footer class="foot">
-      <button id="refresh" class="text-btn">Atualizar</button>
-    </footer>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="/app.js"></script>
+  <footer class="foot">
+    <div class="wrap" style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:12px;">
+      <span>Caderno de gastos</span>
+      <span>Feito com WhatsApp + IA</span>
+    </div>
+  </footer>
 </body>
 </html>

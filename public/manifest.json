@@ -2,7 +2,7 @@
   "name": "Caderno de gastos",
   "short_name": "Caderno",
   "description": "Seus gastos, registrados pelo WhatsApp.",
-  "start_url": "/",
+  "start_url": "/painel.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#07070d",

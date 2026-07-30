@@ -1,16 +1,10 @@
 import { buildReport, buildReportData } from '../lib/report.js';
 import { sendWhatsApp, sendWhatsAppTemplate } from '../lib/whatsapp.js';
+import { listActiveUsers } from '../lib/users.js';
 
-// Disparada pelo Vercel Cron (ver vercel.json). O Vercel invoca via GET e injeta
-// o header Authorization: Bearer <CRON_SECRET> se você tiver setado CRON_SECRET.
-//
-// Como este envio parte do bot (fora da janela de 24h), no WhatsApp OFICIAL ele
-// precisa de um TEMPLATE utility aprovado. Variáveis de template não aceitam
-// quebra de linha, então mandamos os números-chave; o detalhe completo o usuário
-// vê no painel ou respondendo "relatório" (aí abre a janela e vale texto livre).
-//
-// WHATSAPP_USE_TEMPLATE=false força texto livre (para testes dentro da janela ou
-// para Evolution API, que não tem essa restrição).
+// Vercel Cron. Percorre todos os usuários ativos e manda o resumo de cada um.
+// Oficial (fora da janela de 24h) exige template; WHATSAPP_USE_TEMPLATE=false
+// força texto livre (útil em teste dentro da janela ou com Evolution API).
 
 export default async function handler(req, res) {
   const auth = req.headers['authorization'];
@@ -18,32 +12,30 @@ export default async function handler(req, res) {
     return res.status(401).end();
   }
 
-  const recipients = (process.env.REPORT_RECIPIENTS || process.env.ALLOWED_NUMBERS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-
   const useTemplate = process.env.WHATSAPP_USE_TEMPLATE !== 'false';
   const templateName = process.env.REPORT_TEMPLATE_NAME || 'resumo_mensal';
   const templateLang = process.env.REPORT_TEMPLATE_LANG || 'pt_BR';
 
+  const users = await listActiveUsers();
   let sent = 0;
 
-  if (useTemplate) {
-    const d = await buildReportData();
-    // Ordem das variáveis do template: {{1}} mês, {{2}} total, {{3}} nº, {{4}} categoria
-    const params = [d.monthName, d.totalStr, String(d.count), d.topCategory];
-    for (const to of recipients) {
-      const ok = await sendWhatsAppTemplate(to, templateName, templateLang, params);
-      if (ok) sent += 1;
-    }
-  } else {
-    const text = await buildReport();
-    for (const to of recipients) {
-      const ok = await sendWhatsApp(to, text);
-      if (ok) sent += 1;
+  for (const u of users) {
+    try {
+      if (useTemplate) {
+        const d = await buildReportData(u.id);
+        if (d.count === 0) continue; // não incomoda quem não gastou nada
+        const params = [d.monthName, d.totalStr, String(d.count), d.topCategory];
+        const ok = await sendWhatsAppTemplate(u.phone, templateName, templateLang, params);
+        if (ok) sent += 1;
+      } else {
+        const text = await buildReport(u.id);
+        const ok = await sendWhatsApp(u.phone, text);
+        if (ok) sent += 1;
+      }
+    } catch (e) {
+      console.error('Falha no relatório do usuário', u.id, e);
     }
   }
 
-  return res.status(200).json({ sent, total: recipients.length, mode: useTemplate ? 'template' : 'text' });
+  return res.status(200).json({ users: users.length, sent, mode: useTemplate ? 'template' : 'text' });
 }
