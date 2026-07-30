@@ -17,6 +17,9 @@
 
 * { box-sizing: border-box; }
 
+/* o atributo hidden deve sempre vencer (senão display:grid do gate o ignora) */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
