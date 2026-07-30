@@ -1,7 +1,10 @@
-// Service worker mínimo: instalabilidade + cache leve do app shell.
-// Dados (gastos) nunca são cacheados — sempre buscados frescos da API.
+// Service worker mínimo e defensivo.
+// - NUNCA intercepta navegações de página (deixa o navegador lidar com
+//   redirecionamentos; interceptar isso causava ERR_FAILED).
+// - Só cacheia GET do mesmo domínio. Nunca toca em /api.
+// - Dados (gastos) sempre buscados frescos.
 
-const CACHE = 'caderno-gastos-v4';
+const CACHE = 'caderno-gastos-v5';
 const SHELL = [
   '/', '/index.html', '/landing.css',
   '/painel.html', '/styles.css', '/app.js',
@@ -9,7 +12,7 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
   self.skipWaiting();
 });
 
@@ -23,7 +26,12 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
-  if (url.pathname.startsWith('/api/')) return; // nunca cacheia API
-  e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request)));
+  const req = e.request;
+  const url = new URL(req.url);
+  // Deixa o navegador cuidar sozinho de: navegações, outros domínios, não-GET e /api
+  if (req.mode === 'navigate') return;
+  if (url.origin !== self.location.origin) return;
+  if (req.method !== 'GET') return;
+  if (url.pathname.startsWith('/api/')) return;
+  e.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
 });
