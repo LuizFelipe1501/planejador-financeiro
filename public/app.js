@@ -1,7 +1,6 @@
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const brl0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
-// Emoji + cor por categoria
 const CAT = {
   'alimentação': { c: '#3d7bff', e: '🍽️' },
   'transporte':  { c: '#38bdf8', e: '🚗' },
@@ -17,20 +16,104 @@ const CAT = {
 const catInfo = (c) => CAT[c] || CAT['outros'];
 
 const state = { ref: new Date(), chart: null };
-const TOKEN = new URLSearchParams(location.search).get('t');
 const $ = (id) => document.getElementById(id);
 const monthStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
-$('prev-month').addEventListener('click', () => {
-  state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() - 1, 1);
-  load();
-});
-$('next-month').addEventListener('click', () => {
-  state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 1);
-  load();
-});
-$('refresh').addEventListener('click', load);
+// ----- Sessão -----
+const urlToken = new URLSearchParams(location.search).get('t');
+let TOKEN = urlToken || sessionStorage.getItem('cad_token') || null;
 
+function showGate() { $('gate').hidden = false; $('app').hidden = true; }
+function showApp() { $('gate').hidden = true; $('app').hidden = false; }
+
+function init() {
+  if (TOKEN) { showApp(); greet(); load(); }
+  else { showGate(); }
+}
+
+// ----- Login -----
+$('login-btn').addEventListener('click', doLogin);
+$('login-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+$('login-user').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-pass').focus(); });
+
+async function doLogin() {
+  const username = $('login-user').value.trim();
+  const password = $('login-pass').value;
+  if (!username || !password) return;
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!res.ok) { $('login-error').hidden = false; return; }
+    const data = await res.json();
+    TOKEN = data.token;
+    sessionStorage.setItem('cad_token', TOKEN);
+    $('login-error').hidden = true;
+    showApp(); greet(); load();
+  } catch (e) {
+    $('login-error').hidden = false;
+  }
+}
+
+// ----- Navegação / ações -----
+$('prev-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() - 1, 1); load(); });
+$('next-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 1); load(); });
+$('refresh').addEventListener('click', load);
+$('logout').addEventListener('click', () => {
+  sessionStorage.removeItem('cad_token');
+  location.href = '/painel';
+});
+
+// ----- Chat simulador -----
+$('chat-send').addEventListener('click', sendChat);
+$('chat-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+
+function addBubble(text, dir, cls = '') {
+  const el = document.createElement('div');
+  el.className = `chat-bubble ${dir} ${cls}`.trim();
+  el.textContent = text;
+  $('chat-log').appendChild(el);
+  $('chat-log').scrollTop = $('chat-log').scrollHeight;
+  return el;
+}
+
+function greet() {
+  if ($('chat-log').childElementCount === 0) {
+    addBubble('Manda um gasto aqui, tipo "mercado 45" ou "uber 22 ontem". Ou "relatório".', 'in');
+  }
+}
+
+async function sendChat() {
+  const input = $('chat-text');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addBubble(msg, 'out');
+  $('chat-send').disabled = true;
+  const typing = addBubble('digitando…', 'in', 'typing');
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ t: TOKEN, message: msg }),
+    });
+    typing.remove();
+    if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
+    const data = await res.json();
+    addBubble(data.reply || '...', 'in');
+    if (data.saved) load(); // atualiza o painel quando registra um gasto
+  } catch (e) {
+    typing.remove();
+    addBubble('Falha ao enviar. Tenta de novo.', 'in');
+  } finally {
+    $('chat-send').disabled = false;
+    input.focus();
+  }
+}
+
+// ----- Carregar dados -----
 async function load() {
   const label = state.ref.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   $('month-label').textContent = label;
@@ -40,25 +123,17 @@ async function load() {
   try {
     const q = `/api/expenses?month=${monthStr(state.ref)}${TOKEN ? `&t=${encodeURIComponent(TOKEN)}` : ''}`;
     const res = await fetch(q);
-    if (res.status === 401) { renderLocked(); return; }
-    if (res.ok) {
-      const data = await res.json();
-      expenses = data.expenses || [];
-    }
-  } catch (e) {
-    console.error(e);
-  }
+    if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
+    if (res.ok) { const data = await res.json(); expenses = data.expenses || []; }
+  } catch (e) { console.error(e); }
 
   const total = expenses.reduce((s, r) => s + Number(r.amount), 0);
-
-  // Média por dia: dias decorridos se for o mês atual, senão dias do mês
   const now = new Date();
   const sameMonth = now.getFullYear() === state.ref.getFullYear() && now.getMonth() === state.ref.getMonth();
   const daysInMonth = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 0).getDate();
   const daysElapsed = sameMonth ? now.getDate() : daysInMonth;
   const avg = total / Math.max(1, daysElapsed);
 
-  // Categorias
   const byCat = {};
   for (const r of expenses) byCat[r.category] = (byCat[r.category] || 0) + Number(r.amount);
   const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
@@ -76,25 +151,10 @@ async function load() {
   renderTxns(expenses);
 }
 
-function renderLocked() {
-  $('total').textContent = 'R$ 0,00';
-  $('count').textContent = '0';
-  $('avg').textContent = 'R$ 0';
-  $('top').textContent = '—';
-  $('insight').textContent = 'Abra o painel pelo seu link pessoal — o Caderno te envia ele no WhatsApp assim que você manda a primeira mensagem.';
-  if (state.chart) { state.chart.destroy(); state.chart = null; }
-  $('flow').style.display = 'none';
-  $('flow-empty').hidden = false;
-  $('cats').innerHTML = '';
-  $('cats-empty').hidden = false;
-  $('list').innerHTML = '';
-  $('list-empty').hidden = false;
-}
-
 function renderInsight(expenses, total, topCat, topPct, avg, nCats) {
   const el = $('insight');
   if (!expenses.length) {
-    el.textContent = 'Ainda não há gastos neste mês. Manda o primeiro pelo WhatsApp que eu já organizo aqui.';
+    el.textContent = 'Ainda não há gastos neste mês. Manda o primeiro no chat aí em cima.';
     return;
   }
   const parts = [];
@@ -111,15 +171,12 @@ function renderFlow(expenses, daysInMonth) {
   if (state.chart) { state.chart.destroy(); state.chart = null; }
   if (empty) return;
 
-  // Total por dia do mês (1..daysInMonth)
   const daily = new Array(daysInMonth).fill(0);
   for (const r of expenses) {
-    const d = new Date(r.occurred_at + 'T00:00:00');
-    const idx = d.getDate() - 1;
+    const idx = new Date(r.occurred_at + 'T00:00:00').getDate() - 1;
     if (idx >= 0 && idx < daysInMonth) daily[idx] += Number(r.amount);
   }
   const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
   const ctx = $('flow').getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 170);
   grad.addColorStop(0, 'rgba(61, 123, 255, 0.35)');
@@ -127,65 +184,27 @@ function renderFlow(expenses, daysInMonth) {
 
   state.chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data: daily,
-        borderColor: '#3d7bff',
-        backgroundColor: grad,
-        borderWidth: 2,
-        fill: true,
-        tension: 0.35,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        pointHoverBackgroundColor: '#3d7bff',
-      }],
-    },
+    data: { labels, datasets: [{ data: daily, borderColor: '#3d7bff', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#3d7bff' }] },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          displayColors: false,
-          callbacks: {
-            title: (items) => `Dia ${items[0].label}`,
-            label: (item) => brl.format(item.parsed.y),
-          },
-        },
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => `Dia ${i[0].label}`, label: (i) => brl.format(i.parsed.y) } } },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#6b7185', maxTicksLimit: 6, font: { size: 10 } },
-        },
-        y: {
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: {
-            color: '#6b7185',
-            font: { size: 10 },
-            callback: (v) => brl0.format(v),
-            maxTicksLimit: 4,
-          },
-        },
+        x: { grid: { display: false }, ticks: { color: '#6b7185', maxTicksLimit: 6, font: { size: 10 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7185', font: { size: 10 }, callback: (v) => brl0.format(v), maxTicksLimit: 4 } },
       },
     },
   });
 }
 
 function renderCats(cats, total) {
-  const empty = cats.length === 0;
-  $('cats-empty').hidden = !empty;
+  $('cats-empty').hidden = cats.length !== 0;
   const max = cats.length ? cats[0][1] : 1;
   $('cats').innerHTML = cats.map(([cat, val]) => {
     const info = catInfo(cat);
     const pct = total ? Math.round((val / total) * 100) : 0;
     const w = Math.round((val / max) * 100);
     return `<div class="cat-row">
-      <div class="cat-top">
-        <span class="cat-dot" style="background:${info.c}"></span>
-        <span class="cat-name">${cat}</span>
-      </div>
+      <div class="cat-top"><span class="cat-dot" style="background:${info.c}"></span><span class="cat-name">${cat}</span></div>
       <span class="cat-val">${brl.format(val)} · ${pct}%</span>
       <div class="cat-bar"><div class="cat-fill" style="width:${w}%;background:${info.c}"></div></div>
     </div>`;
@@ -196,25 +215,18 @@ function renderTxns(expenses) {
   $('list-empty').hidden = expenses.length > 0;
   $('list').innerHTML = expenses.map((r) => {
     const info = catInfo(r.category);
-    const d = new Date(r.occurred_at + 'T00:00:00');
-    const day = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+    const day = new Date(r.occurred_at + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
     const desc = r.description || r.category;
     return `<div class="txn">
       <span class="txn-chip" style="background:${info.c}22;border:1px solid ${info.c}55">${info.e}</span>
-      <div class="txn-main">
-        <div class="txn-desc">${desc}</div>
-        <div class="txn-cat">${r.category}</div>
-      </div>
-      <div class="txn-right">
-        <div class="txn-amount">${brl.format(Number(r.amount))}</div>
-        <div class="txn-day">${day}</div>
-      </div>
+      <div class="txn-main"><div class="txn-desc">${desc}</div><div class="txn-cat">${r.category}</div></div>
+      <div class="txn-right"><div class="txn-amount">${brl.format(Number(r.amount))}</div><div class="txn-day">${day}</div></div>
     </div>`;
   }).join('');
 }
 
 // Início
-load();
+init();
 
 // PWA
 if ('serviceWorker' in navigator) {

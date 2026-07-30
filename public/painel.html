@@ -14,7 +14,19 @@
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <main class="app">
+  <!-- Login -->
+  <div id="gate" class="gate" hidden>
+    <div class="gate-card">
+      <div class="gate-brand"><span class="brand-mark">R$</span> Caderno</div>
+      <p class="gate-sub">Entre na sua conta</p>
+      <input id="login-user" class="gate-input" placeholder="Usuário" autocomplete="username" />
+      <input id="login-pass" class="gate-input" type="password" placeholder="Senha" autocomplete="current-password" />
+      <button id="login-btn" class="gate-btn">Entrar</button>
+      <p id="login-error" class="gate-error" hidden>Usuário ou senha inválidos.</p>
+    </div>
+  </div>
+
+  <main id="app" class="app" hidden>
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark">R$</span>
@@ -27,7 +39,20 @@
       </div>
     </header>
 
-    <!-- Mesa principal: gasto do período -->
+    <!-- Chat simulador -->
+    <section class="panel chat-panel">
+      <div class="panel-head">
+        <h2>Simulador de WhatsApp</h2>
+        <span class="tag">teste sem a API</span>
+      </div>
+      <div id="chat-log" class="chat-log"></div>
+      <div class="chat-input">
+        <input id="chat-text" placeholder='Ex.: "mercado 45" ou "relatório"' autocomplete="off" />
+        <button id="chat-send" class="chat-send" aria-label="Enviar">➤</button>
+      </div>
+    </section>
+
+    <!-- Hero -->
     <section class="hero">
       <div class="hero-glow"></div>
       <div class="hero-head">
@@ -36,22 +61,12 @@
       </div>
       <div class="hero-total" id="total">R$ 0,00</div>
       <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-val" id="count">0</span>
-          <span class="stat-key">lançamentos</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val" id="avg">R$ 0</span>
-          <span class="stat-key">média/dia</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val stat-cat" id="top">—</span>
-          <span class="stat-key">maior categoria</span>
-        </div>
+        <div class="stat"><span class="stat-val" id="count">0</span><span class="stat-key">lançamentos</span></div>
+        <div class="stat"><span class="stat-val" id="avg">R$ 0</span><span class="stat-key">média/dia</span></div>
+        <div class="stat"><span class="stat-val stat-cat" id="top">—</span><span class="stat-key">maior categoria</span></div>
       </div>
     </section>
 
-    <!-- Linha de insight da IA -->
     <section class="insight">
       <div class="insight-avatar">IA</div>
       <div class="insight-body">
@@ -60,7 +75,6 @@
       </div>
     </section>
 
-    <!-- Mesa: fluxo do mês -->
     <section class="panel">
       <div class="panel-head"><h2>Fluxo do mês</h2></div>
       <div class="chart-wrap">
@@ -69,22 +83,21 @@
       </div>
     </section>
 
-    <!-- Mesa: por categoria -->
     <section class="panel">
       <div class="panel-head"><h2>Por categoria</h2></div>
       <div id="cats" class="cats"></div>
       <div id="cats-empty" class="empty" hidden>Sem gastos neste mês.</div>
     </section>
 
-    <!-- Mesa: lançamentos -->
     <section class="panel">
       <div class="panel-head"><h2>Lançamentos</h2></div>
       <div id="list" class="txns"></div>
-      <div id="list-empty" class="empty" hidden>Nada por aqui ainda. Manda um gasto no WhatsApp.</div>
+      <div id="list-empty" class="empty" hidden>Nada por aqui ainda. Manda um gasto no chat acima.</div>
     </section>
 
     <footer class="foot">
       <button id="refresh" class="text-btn">Atualizar</button>
+      <button id="logout" class="text-btn">Sair</button>
     </footer>
   </main>
 
