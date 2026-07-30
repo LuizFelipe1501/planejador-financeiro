@@ -18,7 +18,7 @@ Projeto `caderno-gastos` criado, tabela `expenses` com RLS.
 2. "Get API key" > "Create API key". Copie a chave (`AIza...`).
 3. Confirme o ID do modelo Flash-Lite disponível na sua conta (o Google renomeia
    com frequência). Guarde para `GEMINI_MODEL`; o padrão do projeto é
-   `gemini-2.5-flash-lite`.
+   `gemini-3.5-flash-lite`.
 4. (Opcional, recomendado para dados financeiros) Ative billing/Tier 1 para que
    seus prompts não sejam usados em treino. No seu volume, o custo é ~zero.
 
