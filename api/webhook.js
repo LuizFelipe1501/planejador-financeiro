@@ -1,5 +1,5 @@
 import { sendWhatsApp } from '../lib/whatsapp.js';
-import { getOrCreateUser } from '../lib/users.js';
+import { getOrCreateUser, normalizePhone } from '../lib/users.js';
 import { processMessage } from '../lib/handleMessage.js';
 
 function panelLink(user) {
@@ -57,6 +57,7 @@ export default async function handler(req, res) {
     }
 
     if (!from || !text) return reply200(res, isTwilio, { ignored: true });
+    from = normalizePhone(from);
 
     // Trava de teste opcional
     const allowed = (process.env.ALLOWED_NUMBERS || '').split(',').map((s) => s.trim()).filter(Boolean);
