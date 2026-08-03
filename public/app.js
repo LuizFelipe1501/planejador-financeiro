@@ -27,7 +27,7 @@ function showGate() { $('gate').hidden = false; $('app').hidden = true; }
 function showApp() { $('gate').hidden = true; $('app').hidden = false; }
 
 function init() {
-  if (TOKEN) { showApp(); greet(); load(); }
+  if (TOKEN) { showApp(); load(); }
   else { showGate(); }
 }
 
@@ -51,7 +51,7 @@ async function doLogin() {
     TOKEN = data.token;
     sessionStorage.setItem('cad_token', TOKEN);
     $('login-error').hidden = true;
-    showApp(); greet(); load();
+    showApp(); load();
   } catch (e) {
     $('login-error').hidden = false;
   }
@@ -65,53 +65,6 @@ $('logout').addEventListener('click', () => {
   sessionStorage.removeItem('cad_token');
   location.href = '/painel';
 });
-
-// ----- Chat simulador -----
-$('chat-send').addEventListener('click', sendChat);
-$('chat-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
-
-function addBubble(text, dir, cls = '') {
-  const el = document.createElement('div');
-  el.className = `chat-bubble ${dir} ${cls}`.trim();
-  el.textContent = text;
-  $('chat-log').appendChild(el);
-  $('chat-log').scrollTop = $('chat-log').scrollHeight;
-  return el;
-}
-
-function greet() {
-  if ($('chat-log').childElementCount === 0) {
-    addBubble('Manda um gasto aqui, tipo "mercado 45" ou "uber 22 ontem". Ou "relatório".', 'in');
-  }
-}
-
-async function sendChat() {
-  const input = $('chat-text');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  addBubble(msg, 'out');
-  $('chat-send').disabled = true;
-  const typing = addBubble('digitando…', 'in', 'typing');
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ t: TOKEN, message: msg }),
-    });
-    typing.remove();
-    if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
-    const data = await res.json();
-    addBubble(data.reply || '...', 'in');
-    if (data.saved) load(); // atualiza o painel quando registra um gasto
-  } catch (e) {
-    typing.remove();
-    addBubble('Falha ao enviar. Tenta de novo.', 'in');
-  } finally {
-    $('chat-send').disabled = false;
-    input.focus();
-  }
-}
 
 // ----- Carregar dados -----
 async function load() {
@@ -154,7 +107,7 @@ async function load() {
 function renderInsight(expenses, total, topCat, topPct, avg, nCats) {
   const el = $('insight');
   if (!expenses.length) {
-    el.textContent = 'Ainda não há gastos neste mês. Manda o primeiro no chat aí em cima.';
+    el.textContent = 'Ainda não há gastos neste mês. Manda o primeiro pelo WhatsApp.';
     return;
   }
   const parts = [];
