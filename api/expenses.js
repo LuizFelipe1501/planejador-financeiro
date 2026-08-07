@@ -29,9 +29,11 @@ export default async function handler(req, res) {
   if (error) return res.status(500).json({ error: error.message });
 
   res.setHeader('Cache-Control', 'no-store');
+  const botNumber = (process.env.WHATSAPP_BOT_NUMBER || process.env.TWILIO_WHATSAPP_FROM || '14155238886').replace(/\D/g, '');
   return res.status(200).json({
     month: `${y}-${String(m).padStart(2, '0')}`,
     user: { name: user.name || null },
+    botNumber,
     expenses: data || [],
   });
 }

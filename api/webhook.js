@@ -1,6 +1,10 @@
-import { sendWhatsApp } from '../lib/whatsapp.js';
+import { sendWhatsApp, fetchTwilioMedia } from '../lib/whatsapp.js';
 import { getOrCreateUser, normalizePhone } from '../lib/users.js';
 import { processMessage } from '../lib/handleMessage.js';
+import { parseExpensesFromImage } from '../lib/gemini.js';
+import { supabase } from '../lib/supabase.js';
+
+const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 function panelLink(user) {
   const base = process.env.APP_URL;
@@ -9,16 +13,16 @@ function panelLink(user) {
 function welcomeMessage(user) {
   const link = panelLink(user);
   const lines = [
-    'Opa! Seu Caderno de gastos está pronto. 👋', '',
-    'Manda seus gastos em texto normal, tipo:',
-    '• "mercado 45"', '• "uber 22 ontem"', '',
-    'Comandos: "relatório" e "ajuda".',
+    'Opa! Aqui é o seu Caderno de gastos. 👋', '',
+    'É simples: sempre que gastar, me manda aqui.',
+    '• Em texto: "mercado 45", "uber 22 ontem"',
+    '• Ou um print do extrato/fatura — eu leio os gastos sozinho.', '',
+    'Tudo aparece organizado no seu painel.',
   ];
-  if (link) lines.push('', `Seu painel: ${link}`);
+  if (link) lines.push('', `Painel: ${link}`);
+  lines.push('', 'Comandos: "relatório" e "ajuda".');
   return lines.join('\n');
 }
-
-// Resposta correta por provedor: Twilio espera TwiML; Meta aceita JSON.
 function reply200(res, isTwilio, json) {
   if (isTwilio) {
     res.setHeader('Content-Type', 'text/xml');
@@ -29,7 +33,7 @@ function reply200(res, isTwilio, json) {
 
 export default async function handler(req, res) {
   const body = req.body || {};
-  const isTwilio = typeof body.From === 'string' && body.Body !== undefined;
+  const isTwilio = typeof body.From === 'string' && (body.Body !== undefined || body.NumMedia !== undefined);
 
   // Verificação do webhook (só Meta usa GET)
   if (req.method === 'GET') {
@@ -44,20 +48,27 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
-    let from, text;
+    let from = '';
+    let text = '';
+    let mediaUrl = null;
+    let mediaType = '';
+
     if (isTwilio) {
-      // Twilio: From = "whatsapp:+5561999998888"
-      from = String(body.From).replace(/^whatsapp:/, '').replace(/[^\d]/g, '');
+      from = normalizePhone(String(body.From).replace(/^whatsapp:/, ''));
       text = String(body.Body || '').trim();
+      const numMedia = parseInt(body.NumMedia || '0', 10);
+      if (numMedia > 0) {
+        mediaUrl = body.MediaUrl0;
+        mediaType = body.MediaContentType0 || '';
+      }
     } else {
       const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
-      if (!message || message.type !== 'text') return reply200(res, isTwilio, { ignored: true });
-      from = message.from;
-      text = (message.text?.body || '').trim();
+      if (!message) return reply200(res, isTwilio, { ignored: true });
+      from = normalizePhone(message.from);
+      if (message.type === 'text') text = (message.text?.body || '').trim();
     }
 
-    if (!from || !text) return reply200(res, isTwilio, { ignored: true });
-    from = normalizePhone(from);
+    if (!from) return reply200(res, isTwilio, { ignored: true });
 
     // Trava de teste opcional
     const allowed = (process.env.ALLOWED_NUMBERS || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -66,6 +77,45 @@ export default async function handler(req, res) {
     const { user, isNew } = await getOrCreateUser(from);
     if (isNew) await sendWhatsApp(from, welcomeMessage(user));
 
+    // 1) Print do extrato (imagem)
+    if (mediaUrl && mediaType.startsWith('image/')) {
+      const media = await fetchTwilioMedia(mediaUrl);
+      if (!media) {
+        await sendWhatsApp(from, 'Não consegui baixar a imagem. Tenta enviar de novo.');
+        return reply200(res, isTwilio, { ok: false });
+      }
+      let expenses = [];
+      try {
+        expenses = await parseExpensesFromImage(media.base64, media.mime);
+      } catch (e) {
+        console.error('Erro na visão:', e);
+      }
+      if (!expenses.length) {
+        await sendWhatsApp(from, 'Não identifiquei gastos nesse print. Manda um extrato/fatura mais nítido, ou digita o gasto (ex.: "mercado 45").');
+        return reply200(res, isTwilio, { ok: true });
+      }
+      const rows = expenses.map((e) => ({
+        user_id: user.id, amount: e.amount, category: e.category,
+        description: e.description, occurred_at: e.occurred_at,
+        raw_message: '[print de extrato]', sender: from,
+      }));
+      const { error } = await supabase.from('expenses').insert(rows);
+      if (error) {
+        console.error('Erro ao salvar print:', error);
+        await sendWhatsApp(from, 'Deu erro ao salvar os gastos do print. Tenta de novo.');
+        return reply200(res, isTwilio, { ok: false });
+      }
+      const total = expenses.reduce((s, e) => s + e.amount, 0);
+      const n = expenses.length;
+      await sendWhatsApp(from, `Reconheci ${n} lançamento${n > 1 ? 's' : ''} no print, somando ${brl.format(total)}. Já estão no seu painel.`);
+      return reply200(res, isTwilio, { ok: true, count: n });
+    }
+
+    // 2) Texto
+    if (!text) {
+      await sendWhatsApp(from, 'Manda o gasto em texto (ex.: "mercado 45") ou um print do extrato.');
+      return reply200(res, isTwilio, { ignored: true });
+    }
     const { reply } = await processMessage(user, text);
     await sendWhatsApp(from, reply);
     return reply200(res, isTwilio, { ok: true });

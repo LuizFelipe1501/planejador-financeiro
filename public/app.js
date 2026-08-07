@@ -77,7 +77,7 @@ async function load() {
     const q = `/api/expenses?month=${monthStr(state.ref)}${TOKEN ? `&t=${encodeURIComponent(TOKEN)}` : ''}`;
     const res = await fetch(q);
     if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
-    if (res.ok) { const data = await res.json(); expenses = data.expenses || []; }
+    if (res.ok) { const data = await res.json(); expenses = data.expenses || []; if (data.botNumber) $('wa-fab').href = `https://wa.me/${data.botNumber}`; }
   } catch (e) { console.error(e); }
 
   const total = expenses.reduce((s, r) => s + Number(r.amount), 0);
