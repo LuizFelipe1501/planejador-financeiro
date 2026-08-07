@@ -18,11 +18,26 @@
   <div id="gate" class="gate" hidden>
     <div class="gate-card">
       <div class="gate-brand"><span class="brand-mark">R$</span> Caderno</div>
-      <p class="gate-sub">Entre na sua conta</p>
-      <input id="login-user" class="gate-input" placeholder="Usuário" autocomplete="username" />
-      <input id="login-pass" class="gate-input" type="password" placeholder="Senha" autocomplete="current-password" />
-      <button id="login-btn" class="gate-btn">Entrar</button>
-      <p id="login-error" class="gate-error" hidden>Usuário ou senha inválidos.</p>
+
+      <div id="pane-login">
+        <p class="gate-sub">Entre na sua conta</p>
+        <input id="login-user" class="gate-input" placeholder="Usuário" autocomplete="username" />
+        <input id="login-pass" class="gate-input" type="password" placeholder="Senha" autocomplete="current-password" />
+        <button id="login-btn" class="gate-btn">Entrar</button>
+        <p id="login-error" class="gate-error" hidden>Usuário ou senha inválidos.</p>
+        <p class="gate-switch">Não tem conta? <a id="to-register">Criar conta</a></p>
+      </div>
+
+      <div id="pane-register" hidden>
+        <p class="gate-sub">Criar sua conta</p>
+        <input id="reg-name" class="gate-input" placeholder="Seu nome" autocomplete="name" />
+        <input id="reg-phone" class="gate-input" placeholder="WhatsApp com DDD (ex.: 61 99999-8888)" inputmode="tel" />
+        <input id="reg-user" class="gate-input" placeholder="Usuário" autocomplete="username" />
+        <input id="reg-pass" class="gate-input" type="password" placeholder="Senha (mín. 6)" autocomplete="new-password" />
+        <button id="reg-btn" class="gate-btn">Criar conta</button>
+        <p id="reg-error" class="gate-error" hidden></p>
+        <p class="gate-switch">Já tem conta? <a id="to-login">Entrar</a></p>
+      </div>
     </div>
   </div>
 
@@ -67,6 +82,10 @@
           </div>
         </div>
       </div>
+      <a id="wa-activate" class="howto-cta" href="https://wa.me/14155238886" target="_blank" rel="noopener">
+        Ativar meu WhatsApp
+      </a>
+      <p class="howto-hint">Primeira vez? Toque acima e envie a mensagem que já vem pronta para liberar seu número.</p>
     </section>
 
     <!-- Hero -->

@@ -30,10 +30,12 @@ export default async function handler(req, res) {
 
   res.setHeader('Cache-Control', 'no-store');
   const botNumber = (process.env.WHATSAPP_BOT_NUMBER || process.env.TWILIO_WHATSAPP_FROM || '14155238886').replace(/\D/g, '');
+  const joinCode = process.env.TWILIO_JOIN_CODE || 'letter-divide';
   return res.status(200).json({
     month: `${y}-${String(m).padStart(2, '0')}`,
     user: { name: user.name || null },
     botNumber,
+    joinCode,
     expenses: data || [],
   });
 }

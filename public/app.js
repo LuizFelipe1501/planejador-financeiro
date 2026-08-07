@@ -54,6 +54,37 @@ async function doLogin() {
   } catch (e) { $('login-error').hidden = false; }
 }
 
+// Troca entre entrar e criar conta
+$('to-register').addEventListener('click', () => { $('pane-login').hidden = true; $('pane-register').hidden = false; });
+$('to-login').addEventListener('click', () => { $('pane-register').hidden = true; $('pane-login').hidden = false; });
+
+// Cadastro
+$('reg-btn').addEventListener('click', doSignup);
+$('reg-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSignup(); });
+
+async function doSignup() {
+  const name = $('reg-name').value.trim();
+  const phone = $('reg-phone').value.trim();
+  const username = $('reg-user').value.trim();
+  const password = $('reg-pass').value;
+  const err = $('reg-error');
+  if (!name || !phone || !username || !password) {
+    err.textContent = 'Preencha todos os campos.'; err.hidden = false; return;
+  }
+  try {
+    const res = await fetch('/api/signup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Não foi possível criar a conta.'; err.hidden = false; return; }
+    TOKEN = data.token;
+    sessionStorage.setItem('cad_token', TOKEN);
+    err.hidden = true;
+    showApp(); load();
+  } catch (e) { err.textContent = 'Erro de conexão. Tenta de novo.'; err.hidden = false; }
+}
+
 // ----- Navegação / ações -----
 $('prev-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() - 1, 1); load(); });
 $('next-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 1); load(); });
@@ -71,7 +102,15 @@ async function load() {
     const q = `/api/expenses?month=${monthStr(state.ref)}${TOKEN ? `&t=${encodeURIComponent(TOKEN)}` : ''}`;
     const res = await fetch(q);
     if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
-    if (res.ok) { const data = await res.json(); items = data.expenses || []; if (data.botNumber) $('wa-fab').href = `https://wa.me/${data.botNumber}`; }
+    if (res.ok) {
+      const data = await res.json();
+      items = data.expenses || [];
+      if (data.botNumber) {
+        $('wa-fab').href = `https://wa.me/${data.botNumber}`;
+        const join = encodeURIComponent(`join ${data.joinCode || 'letter-divide'}`);
+        $('wa-activate').href = `https://wa.me/${data.botNumber}?text=${join}`;
+      }
+    }
   } catch (e) { console.error(e); }
 
   const incomes = items.filter((r) => r.kind === 'income');

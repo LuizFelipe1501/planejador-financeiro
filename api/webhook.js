@@ -1,5 +1,5 @@
 import { sendWhatsApp, fetchTwilioMedia } from '../lib/whatsapp.js';
-import { getOrCreateUser, normalizePhone } from '../lib/users.js';
+import { getOrCreateUser, getUserByPhone, normalizePhone } from '../lib/users.js';
 import { processMessage } from '../lib/handleMessage.js';
 import { parseExpensesFromImage } from '../lib/gemini.js';
 import { supabase } from '../lib/supabase.js';
@@ -70,11 +70,16 @@ export default async function handler(req, res) {
 
     if (!from) return reply200(res, isTwilio, { ignored: true });
 
-    // Trava de teste opcional
-    const allowed = (process.env.ALLOWED_NUMBERS || '').split(',').map((s) => s.trim()).filter(Boolean);
-    if (allowed.length && !allowed.includes(from)) return reply200(res, isTwilio, { blocked: true });
+    // Liberação: quem já está cadastrado (tabela) sempre passa. Número
+    // desconhecido só passa se ALLOWED_NUMBERS estiver vazio (onboarding aberto)
+    // ou se estiver listado nela.
+    const known = await getUserByPhone(from);
+    if (!known) {
+      const allowed = (process.env.ALLOWED_NUMBERS || '').split(',').map((s) => s.trim()).filter(Boolean);
+      if (allowed.length && !allowed.includes(from)) return reply200(res, isTwilio, { blocked: true });
+    }
 
-    const { user, isNew } = await getOrCreateUser(from);
+    const { user, isNew } = known ? { user: known, isNew: false } : await getOrCreateUser(from);
     if (isNew) await sendWhatsApp(from, welcomeMessage(user));
 
     // 1) Print do extrato (imagem)
