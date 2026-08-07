@@ -1,6 +1,6 @@
 {
-  "name": "Caderno de gastos",
-  "short_name": "Caderno",
+  "name": "Naxe",
+  "short_name": "Naxe",
   "description": "Seus gastos, registrados pelo WhatsApp.",
   "start_url": "/painel",
   "display": "standalone",

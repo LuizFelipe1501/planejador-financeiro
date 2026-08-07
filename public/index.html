@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caderno — seus gastos no WhatsApp</title>
-  <meta name="theme-color" content="#07070d" />
-  <meta name="description" content="Anote seus gastos mandando uma mensagem no WhatsApp. A IA categoriza, soma e organiza num painel em tempo real." />
+  <title>Naxe — seu dinheiro num zap</title>
+  <meta name="theme-color" content="#0b0b0c" />
+  <meta name="description" content="Manda um gasto em texto ou uma foto do extrato. A Naxe entende, separa entradas e saídas e organiza tudo num painel. Direto no WhatsApp." />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/landing.css" />
 </head>
 <body>
   <nav class="nav">
     <div class="wrap nav-inner">
       <a class="brand" href="/">
-        <span class="brand-mark">R$</span>
-        <span>Caderno</span>
+        <span class="brand-mark">
+          <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="25" height="25" rx="8" stroke="currentColor" stroke-width="2.2"/><polyline points="9,21 13,16 17,18.5 23,10.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="10.5" r="2" fill="currentColor"/></svg>
+        </span>
+        <span>Naxe</span>
       </a>
       <div class="nav-links">
         <a href="#recursos">Recursos</a>
         <a href="#como">Como funciona</a>
-        <a class="btn btn-primary" href="/painel">Abrir painel</a>
+        <a class="btn btn-primary" href="/painel">Entrar</a>
       </div>
     </div>
   </nav>
@@ -30,32 +32,34 @@
   <header class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">● Seu dinheiro, direto no WhatsApp</span>
-        <h1>Anote seus gastos como quem <span class="grad">manda um zap</span>.</h1>
-        <p class="lead">Sem planilha, sem app pra abrir. Você manda "mercado 45" no WhatsApp e o resto acontece sozinho: categorizado, somado e pronto pra consultar no painel.</p>
+        <span class="eyebrow">Controle financeiro no WhatsApp</span>
+        <h1>Todo o seu dinheiro, dentro de <span class="u">um zap</span>.</h1>
+        <p class="lead">Manda um gasto em texto ou uma foto do extrato. A Naxe entende, separa o que entrou do que saiu e organiza tudo num painel. Sem planilha, sem app pra abrir.</p>
         <div class="hero-ctas">
-          <a class="btn btn-primary btn-lg" href="/painel">Abrir painel →</a>
+          <a class="btn btn-primary btn-lg" href="/painel">Criar conta →</a>
           <a class="btn btn-ghost btn-lg" href="#como">Como funciona</a>
         </div>
-        <p class="hero-note">Registro por texto · categorização automática por IA · relatório no WhatsApp</p>
+        <p class="hero-note">Texto ou print · entradas e saídas · vários perfis</p>
       </div>
 
       <div class="phone">
         <div class="phone-screen">
           <div class="wa-head">
-            <div class="wa-avatar">R$</div>
+            <div class="wa-avatar">
+              <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="25" height="25" rx="8" stroke="currentColor" stroke-width="2.2"/><polyline points="9,21 13,16 17,18.5 23,10.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="10.5" r="2" fill="currentColor"/></svg>
+            </div>
             <div>
-              <div class="wa-name">Caderno</div>
+              <div class="wa-name">Naxe</div>
               <div class="wa-status">online</div>
             </div>
           </div>
           <div class="wa-body">
             <div class="bubble out">mercado 45<span class="t">14:32</span></div>
             <div class="bubble in">Anotado: <b>R$ 45,00</b> em alimentação.<span class="t">14:32</span></div>
-            <div class="bubble out">uber 22 ontem<span class="t">14:33</span></div>
-            <div class="bubble in">Anotado: <b>R$ 22,00</b> em transporte (Uber).<span class="t">14:33</span></div>
-            <div class="bubble out">relatório<span class="t">14:35</span></div>
-            <div class="bubble in">Resumo de julho<br/>Total: <b>R$ 1.240,00</b><br/>18 lançamentos<span class="t">14:35</span></div>
+            <div class="bubble out">recebi 1300 do estágio<span class="t">14:33</span></div>
+            <div class="bubble in">Recebido: <b class="pos">R$ 1.300,00</b> em salário.<span class="t">14:33</span></div>
+            <div class="bubble out att"><span class="att-ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>extrato.png<span class="t">14:34</span></div>
+            <div class="bubble in">Reconheci <b>6 lançamentos</b> no print. Já estão no painel.<span class="t">14:34</span></div>
           </div>
         </div>
       </div>
@@ -64,32 +68,32 @@
 
   <div class="wrap">
     <div class="strip">
-      <span><span class="dot"></span> Categorização automática</span>
-      <span><span class="dot"></span> Painel em tempo real</span>
-      <span><span class="dot"></span> Relatório semanal</span>
-      <span><span class="dot"></span> Instalável no celular</span>
+      <span>Print de extrato</span>
+      <span>Entradas e saídas</span>
+      <span>Categorização por IA</span>
+      <span>Vários perfis</span>
     </div>
   </div>
 
   <section class="section" id="recursos">
     <div class="wrap">
-      <h2>Feito pra quem odeia planilha.</h2>
-      <p class="sub">Toda a burocracia de anotar gasto vira uma mensagem. A IA cuida do resto.</p>
+      <h2>Menos esforço que anotar num papel.</h2>
+      <p class="sub">Toda a chatice de controlar dinheiro vira uma mensagem. A IA cuida do resto.</p>
       <div class="cards">
         <div class="feature">
-          <div class="ic">💬</div>
-          <h3>Anote em segundos</h3>
-          <p>Manda o gasto em texto normal, do seu jeito. A IA entende o valor, a categoria e até a data ("ontem", "sexta").</p>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a8 8 0 0 1-8 8H4l1.5-3A8 8 0 1 1 21 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Texto ou print</h3>
+          <p>Manda "mercado 45" ou uma foto do extrato do banco. A IA lê os dois, entende valor, categoria e data.</p>
         </div>
         <div class="feature">
-          <div class="ic">📊</div>
-          <h3>Painel que se organiza</h3>
-          <p>Gasto do período, fluxo do mês, quebra por categoria e todos os lançamentos, atualizados na hora.</p>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Entradas e saídas</h3>
+          <p>Veja quanto entrou, quanto saiu e o saldo do mês. Com a quebra por categoria de onde seu dinheiro foi.</p>
         </div>
         <div class="feature">
-          <div class="ic">🔔</div>
-          <h3>Relatório vem até você</h3>
-          <p>Um resumo do mês chega no seu WhatsApp. E quando quiser, é só mandar "relatório" pra ver na hora.</p>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M17 2v4M15 4h4M6 4v3M4.5 5.5h3M19 15v3M17.5 16.5h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13 7 4 20l3-1 9-13-3 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>No WhatsApp de sempre</h3>
+          <p>Nada pra instalar. Você cadastra, ativa o WhatsApp num toque e já começa a registrar.</p>
         </div>
       </div>
     </div>
@@ -98,19 +102,22 @@
   <section class="section" id="como">
     <div class="wrap">
       <h2>Como funciona</h2>
-      <p class="sub">Três passos. O primeiro leva cinco segundos.</p>
+      <p class="sub">Três passos. O primeiro leva meio minuto.</p>
       <div class="steps">
         <div class="step">
-          <h3>Manda o gasto</h3>
-          <p>"iFood 38", "gasolina 200", "farmácia 47 ontem". Do jeito que vier na cabeça.</p>
+          <span class="step-n">01</span>
+          <h3>Crie sua conta</h3>
+          <p>Nome, WhatsApp e senha. Seu número já fica liberado na hora.</p>
         </div>
         <div class="step">
-          <h3>A IA organiza</h3>
-          <p>O gasto é categorizado e guardado automaticamente. Você recebe a confirmação na hora.</p>
+          <span class="step-n">02</span>
+          <h3>Ative o WhatsApp</h3>
+          <p>Um toque envia a mensagem de ativação. Pronto, o canal está aberto.</p>
         </div>
         <div class="step">
-          <h3>Você acompanha</h3>
-          <p>Abre o painel e vê pra onde seu dinheiro está indo, sem esforço nenhum.</p>
+          <span class="step-n">03</span>
+          <h3>Registre e acompanhe</h3>
+          <p>Manda gastos e entradas por texto ou print. Vê tudo organizado no painel.</p>
         </div>
       </div>
     </div>
@@ -118,15 +125,18 @@
 
   <div class="wrap">
     <div class="cta">
-      <h2>Pronto pra parar de perder o controle dos gastos?</h2>
-      <a class="btn btn-primary btn-lg" href="/painel">Abrir meu painel →</a>
+      <h2>Comece a ver pra onde seu dinheiro vai.</h2>
+      <a class="btn btn-primary btn-lg" href="/painel">Criar conta →</a>
     </div>
   </div>
 
   <footer class="foot">
-    <div class="wrap" style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:12px;">
-      <span>Caderno de gastos</span>
-      <span>Feito com WhatsApp + IA</span>
+    <div class="wrap foot-inner">
+      <span class="brand">
+        <span class="brand-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="25" height="25" rx="8" stroke="currentColor" stroke-width="2.2"/><polyline points="9,21 13,16 17,18.5 23,10.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="10.5" r="2" fill="currentColor"/></svg></span>
+        Naxe
+      </span>
+      <span>WhatsApp + IA</span>
     </div>
   </footer>
 </body>
