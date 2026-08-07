@@ -39,18 +39,53 @@
       </div>
     </header>
 
+    <section class="howto">
+      <div class="howto-head">
+        <h2>Como funciona</h2>
+        <span class="howto-tag">registre pelo WhatsApp</span>
+      </div>
+      <div class="howto-steps">
+        <div class="howto-step">
+          <span class="howto-num">1</span>
+          <div>
+            <b>Registre no WhatsApp</b>
+            <p>Escreva o gasto ("mercado 45", "uber 22 ontem") ou mande um print do extrato do banco.</p>
+          </div>
+        </div>
+        <div class="howto-step">
+          <span class="howto-num">2</span>
+          <div>
+            <b>A IA organiza</b>
+            <p>Ela entende o valor, categoriza e, no print, reconhece vários gastos de uma vez.</p>
+          </div>
+        </div>
+        <div class="howto-step">
+          <span class="howto-num">3</span>
+          <div>
+            <b>Acompanhe aqui</b>
+            <p>Total do mês, categorias e histórico aparecem neste painel, atualizados na hora.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Hero -->
     <section class="hero">
       <div class="hero-glow"></div>
       <div class="hero-head">
-        <span class="hero-label">Gasto no período</span>
+        <span class="hero-label">Saldo do período</span>
         <span class="hero-chip" id="hero-month">—</span>
       </div>
-      <div class="hero-total" id="total">R$ 0,00</div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-val" id="count">0</span><span class="stat-key">lançamentos</span></div>
-        <div class="stat"><span class="stat-val" id="avg">R$ 0</span><span class="stat-key">média/dia</span></div>
-        <div class="stat"><span class="stat-val stat-cat" id="top">—</span><span class="stat-key">maior categoria</span></div>
+      <div class="hero-total" id="balance">R$ 0,00</div>
+      <div class="hero-io">
+        <div class="io io-in">
+          <span class="io-arrow">↓</span>
+          <div class="io-body"><span class="io-key">Entradas</span><span class="io-val" id="income">R$ 0</span></div>
+        </div>
+        <div class="io io-out">
+          <span class="io-arrow">↑</span>
+          <div class="io-body"><span class="io-key">Saídas</span><span class="io-val" id="expense">R$ 0</span></div>
+        </div>
       </div>
     </section>
 
@@ -63,7 +98,7 @@
     </section>
 
     <section class="panel">
-      <div class="panel-head"><h2>Fluxo do mês</h2></div>
+      <div class="panel-head"><h2>Entradas e saídas</h2></div>
       <div class="chart-wrap">
         <canvas id="flow"></canvas>
         <div id="flow-empty" class="empty" hidden>Sem gastos neste mês.</div>
@@ -71,7 +106,7 @@
     </section>
 
     <section class="panel">
-      <div class="panel-head"><h2>Por categoria</h2></div>
+      <div class="panel-head"><h2>Gastos por categoria</h2></div>
       <div id="cats" class="cats"></div>
       <div id="cats-empty" class="empty" hidden>Sem gastos neste mês.</div>
     </section>

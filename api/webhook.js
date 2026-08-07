@@ -84,31 +84,36 @@ export default async function handler(req, res) {
         await sendWhatsApp(from, 'Não consegui baixar a imagem. Tenta enviar de novo.');
         return reply200(res, isTwilio, { ok: false });
       }
-      let expenses = [];
+      let txns = [];
       try {
-        expenses = await parseExpensesFromImage(media.base64, media.mime);
+        txns = await parseExpensesFromImage(media.base64, media.mime);
       } catch (e) {
         console.error('Erro na visão:', e);
       }
-      if (!expenses.length) {
-        await sendWhatsApp(from, 'Não identifiquei gastos nesse print. Manda um extrato/fatura mais nítido, ou digita o gasto (ex.: "mercado 45").');
+      if (!txns.length) {
+        await sendWhatsApp(from, 'Não identifiquei lançamentos nesse print. Manda um extrato/fatura mais nítido, ou digita (ex.: "mercado 45").');
         return reply200(res, isTwilio, { ok: true });
       }
-      const rows = expenses.map((e) => ({
-        user_id: user.id, amount: e.amount, category: e.category,
+      const rows = txns.map((e) => ({
+        user_id: user.id, kind: e.kind, amount: e.amount, category: e.category,
         description: e.description, occurred_at: e.occurred_at,
         raw_message: '[print de extrato]', sender: from,
       }));
       const { error } = await supabase.from('expenses').insert(rows);
       if (error) {
         console.error('Erro ao salvar print:', error);
-        await sendWhatsApp(from, 'Deu erro ao salvar os gastos do print. Tenta de novo.');
+        await sendWhatsApp(from, 'Deu erro ao salvar os lançamentos do print. Tenta de novo.');
         return reply200(res, isTwilio, { ok: false });
       }
-      const total = expenses.reduce((s, e) => s + e.amount, 0);
-      const n = expenses.length;
-      await sendWhatsApp(from, `Reconheci ${n} lançamento${n > 1 ? 's' : ''} no print, somando ${brl.format(total)}. Já estão no seu painel.`);
-      return reply200(res, isTwilio, { ok: true, count: n });
+      const saidas = txns.filter((t) => t.kind !== 'income');
+      const entradas = txns.filter((t) => t.kind === 'income');
+      const totalSaida = saidas.reduce((s, e) => s + e.amount, 0);
+      const totalEntrada = entradas.reduce((s, e) => s + e.amount, 0);
+      const partes = [];
+      if (saidas.length) partes.push(`${saidas.length} saída${saidas.length > 1 ? 's' : ''} (${brl.format(totalSaida)})`);
+      if (entradas.length) partes.push(`${entradas.length} entrada${entradas.length > 1 ? 's' : ''} (${brl.format(totalEntrada)})`);
+      await sendWhatsApp(from, `Reconheci ${partes.join(' e ')} no print. Já estão no seu painel.`);
+      return reply200(res, isTwilio, { ok: true, count: txns.length });
     }
 
     // 2) Texto

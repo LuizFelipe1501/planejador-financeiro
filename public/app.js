@@ -42,8 +42,7 @@ async function doLogin() {
   if (!username || !password) return;
   try {
     const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
     if (!res.ok) { $('login-error').hidden = false; return; }
@@ -52,19 +51,14 @@ async function doLogin() {
     sessionStorage.setItem('cad_token', TOKEN);
     $('login-error').hidden = true;
     showApp(); load();
-  } catch (e) {
-    $('login-error').hidden = false;
-  }
+  } catch (e) { $('login-error').hidden = false; }
 }
 
 // ----- Navegação / ações -----
 $('prev-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() - 1, 1); load(); });
 $('next-month').addEventListener('click', () => { state.ref = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 1); load(); });
 $('refresh').addEventListener('click', load);
-$('logout').addEventListener('click', () => {
-  sessionStorage.removeItem('cad_token');
-  location.href = '/painel';
-});
+$('logout').addEventListener('click', () => { sessionStorage.removeItem('cad_token'); location.href = '/painel'; });
 
 // ----- Carregar dados -----
 async function load() {
@@ -72,75 +66,84 @@ async function load() {
   $('month-label').textContent = label;
   $('hero-month').textContent = label;
 
-  let expenses = [];
+  let items = [];
   try {
     const q = `/api/expenses?month=${monthStr(state.ref)}${TOKEN ? `&t=${encodeURIComponent(TOKEN)}` : ''}`;
     const res = await fetch(q);
     if (res.status === 401) { sessionStorage.removeItem('cad_token'); showGate(); return; }
-    if (res.ok) { const data = await res.json(); expenses = data.expenses || []; if (data.botNumber) $('wa-fab').href = `https://wa.me/${data.botNumber}`; }
+    if (res.ok) { const data = await res.json(); items = data.expenses || []; if (data.botNumber) $('wa-fab').href = `https://wa.me/${data.botNumber}`; }
   } catch (e) { console.error(e); }
 
-  const total = expenses.reduce((s, r) => s + Number(r.amount), 0);
-  const now = new Date();
-  const sameMonth = now.getFullYear() === state.ref.getFullYear() && now.getMonth() === state.ref.getMonth();
-  const daysInMonth = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 0).getDate();
-  const daysElapsed = sameMonth ? now.getDate() : daysInMonth;
-  const avg = total / Math.max(1, daysElapsed);
+  const incomes = items.filter((r) => r.kind === 'income');
+  const expenses = items.filter((r) => r.kind !== 'income');
+  const incomeTotal = incomes.reduce((s, r) => s + Number(r.amount), 0);
+  const expenseTotal = expenses.reduce((s, r) => s + Number(r.amount), 0);
+  const balance = incomeTotal - expenseTotal;
+
+  $('income').textContent = brl0.format(incomeTotal);
+  $('expense').textContent = brl0.format(expenseTotal);
+  $('balance').textContent = brl.format(balance);
+  $('balance').classList.toggle('neg', balance < 0);
 
   const byCat = {};
   for (const r of expenses) byCat[r.category] = (byCat[r.category] || 0) + Number(r.amount);
   const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-  const topCat = cats.length ? cats[0][0] : '—';
-  const topPct = cats.length && total ? Math.round((cats[0][1] / total) * 100) : 0;
+  const daysInMonth = new Date(state.ref.getFullYear(), state.ref.getMonth() + 1, 0).getDate();
 
-  $('total').textContent = brl.format(total);
-  $('count').textContent = String(expenses.length);
-  $('avg').textContent = brl0.format(avg);
-  $('top').textContent = topCat;
-
-  renderInsight(expenses, total, topCat, topPct, avg, cats.length);
-  renderFlow(expenses, daysInMonth);
-  renderCats(cats, total);
-  renderTxns(expenses);
+  renderInsight(incomeTotal, expenseTotal, balance, cats);
+  renderFlow(incomes, expenses, daysInMonth);
+  renderCats(cats, expenseTotal);
+  renderTxns(items);
 }
 
-function renderInsight(expenses, total, topCat, topPct, avg, nCats) {
+function renderInsight(income, expense, balance, cats) {
   const el = $('insight');
-  if (!expenses.length) {
-    el.textContent = 'Ainda não há gastos neste mês. Manda o primeiro pelo WhatsApp.';
+  if (income === 0 && expense === 0) {
+    el.textContent = 'Ainda não há lançamentos neste mês. Manda o primeiro pelo WhatsApp.';
     return;
   }
   const parts = [];
-  parts.push(`<b>${topCat}</b> lidera seus gastos, com <b>${topPct}%</b> do total`);
-  parts.push(`Você está gastando em média <b>${brl0.format(avg)}</b> por dia`);
-  if (nCats >= 4) parts.push(`espalhados por <b>${nCats}</b> categorias`);
+  if (balance >= 0) parts.push(`Você está no azul: sobrou <b>${brl0.format(balance)}</b> no período`);
+  else parts.push(`Atenção: saíram <b>${brl0.format(-balance)}</b> a mais do que entraram`);
+  if (cats.length && expense) {
+    const [c, v] = cats[0];
+    parts.push(`<b>${c}</b> é seu maior gasto (<b>${Math.round((v / expense) * 100)}%</b>)`);
+  }
   el.innerHTML = parts.join('. ') + '.';
 }
 
-function renderFlow(expenses, daysInMonth) {
-  const empty = expenses.length === 0;
+function renderFlow(incomes, expenses, daysInMonth) {
+  const empty = incomes.length + expenses.length === 0;
   $('flow-empty').hidden = !empty;
   $('flow').style.display = empty ? 'none' : 'block';
   if (state.chart) { state.chart.destroy(); state.chart = null; }
   if (empty) return;
 
-  const daily = new Array(daysInMonth).fill(0);
-  for (const r of expenses) {
-    const idx = new Date(r.occurred_at + 'T00:00:00').getDate() - 1;
-    if (idx >= 0 && idx < daysInMonth) daily[idx] += Number(r.amount);
-  }
+  const dIn = new Array(daysInMonth).fill(0);
+  const dOut = new Array(daysInMonth).fill(0);
+  const put = (arr, r) => { const i = new Date(r.occurred_at + 'T00:00:00').getDate() - 1; if (i >= 0 && i < daysInMonth) arr[i] += Number(r.amount); };
+  incomes.forEach((r) => put(dIn, r));
+  expenses.forEach((r) => put(dOut, r));
+
   const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const ctx = $('flow').getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 170);
-  grad.addColorStop(0, 'rgba(61, 123, 255, 0.35)');
-  grad.addColorStop(1, 'rgba(61, 123, 255, 0)');
+  const gOut = ctx.createLinearGradient(0, 0, 0, 170);
+  gOut.addColorStop(0, 'rgba(61,123,255,0.30)'); gOut.addColorStop(1, 'rgba(61,123,255,0)');
+  const gIn = ctx.createLinearGradient(0, 0, 0, 170);
+  gIn.addColorStop(0, 'rgba(34,197,94,0.30)'); gIn.addColorStop(1, 'rgba(34,197,94,0)');
 
   state.chart = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ data: daily, borderColor: '#3d7bff', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#3d7bff' }] },
+    data: { labels, datasets: [
+      { label: 'Entradas', data: dIn, borderColor: '#22c55e', backgroundColor: gIn, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'Saídas', data: dOut, borderColor: '#3d7bff', backgroundColor: gOut, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4 },
+    ] },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => `Dia ${i[0].label}`, label: (i) => brl.format(i.parsed.y) } } },
+      responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#9aa3b4', boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 11 } } },
+        tooltip: { callbacks: { title: (i) => `Dia ${i[0].label}`, label: (i) => `${i.dataset.label}: ${brl.format(i.parsed.y)}` } },
+      },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#6b7185', maxTicksLimit: 6, font: { size: 10 } } },
         y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7185', font: { size: 10 }, callback: (v) => brl0.format(v), maxTicksLimit: 4 } },
@@ -164,16 +167,18 @@ function renderCats(cats, total) {
   }).join('');
 }
 
-function renderTxns(expenses) {
-  $('list-empty').hidden = expenses.length > 0;
-  $('list').innerHTML = expenses.map((r) => {
-    const info = catInfo(r.category);
+function renderTxns(items) {
+  $('list-empty').hidden = items.length > 0;
+  $('list').innerHTML = items.map((r) => {
+    const inc = r.kind === 'income';
+    const info = inc ? { c: '#22c55e', e: '💰' } : catInfo(r.category);
     const day = new Date(r.occurred_at + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
     const desc = r.description || r.category;
+    const amt = `${inc ? '+' : '−'} ${brl.format(Number(r.amount))}`;
     return `<div class="txn">
       <span class="txn-chip" style="background:${info.c}22;border:1px solid ${info.c}55">${info.e}</span>
       <div class="txn-main"><div class="txn-desc">${desc}</div><div class="txn-cat">${r.category}</div></div>
-      <div class="txn-right"><div class="txn-amount">${brl.format(Number(r.amount))}</div><div class="txn-day">${day}</div></div>
+      <div class="txn-right"><div class="txn-amount ${inc ? 'amt-in' : 'amt-out'}">${amt}</div><div class="txn-day">${day}</div></div>
     </div>`;
   }).join('');
 }

@@ -4,7 +4,7 @@
 //   nova), e só usa o cache se estiver offline. Isso evita servir arquivo velho.
 // - Nunca toca em /api. Dados sempre frescos.
 
-const CACHE = 'caderno-gastos-v8';
+const CACHE = 'caderno-gastos-v10';
 const SHELL = [
   '/', '/index.html', '/landing.css',
   '/painel.html', '/styles.css', '/app.js',

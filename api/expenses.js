@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   const { data, error } = await supabase
     .from('expenses')
-    .select('id, amount, category, description, occurred_at, created_at')
+    .select('id, kind, amount, category, description, occurred_at, created_at')
     .eq('user_id', user.id)
     .gte('occurred_at', start)
     .lte('occurred_at', end)
